@@ -17,3 +17,4 @@ env/
 .DS_Store
 Thumbs.db
 미션.txt
+.vercel

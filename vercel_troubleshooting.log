@@ -1,0 +1,41 @@
+================================================================================
+VERCEL DEPLOYMENT & TROUBLESHOOTING LOG
+Date: 2026-08-25
+Project: A1-3 (AI 명언 생성기)
+================================================================================
+
+[Q1] 사용자: "vercel 실행하는 방법 알려주세요."
+- 해결 사항: 
+  Vercel CLI 사용법(로컬 개발 서버 띄우는 `vercel dev`, 배포하는 `vercel`)에 대해 안내함.
+
+--------------------------------------------------------------------------------
+[Q2] 사용자: "npm 설치부터 진행해줘." 및 "직접 실행해줄래."
+- 해결 사항: 
+  1. `npm i -g vercel` 명령어로 Vercel CLI 전역 설치 완료.
+  2. Vercel 계정 미로그인 상태였으므로, Vercel 임시 배포(`vercel deploy --temporary`) 기능을 활용해 배포 자동화 진행 후 링크 전달.
+
+--------------------------------------------------------------------------------
+[Q3] 사용자: "vercel dev" 실행 시 다음과 같은 에러 발생 보고
+  - Error: Python dev server exited before binding (code=9009)
+  - SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes...
+- 해결 사항: 
+  1. code=9009 문제: Windows 환경의 가상 환경에는 `python3.exe`가 생성되지 않아 발생하는 문제. 가상 환경을 생성하고 `python.exe`를 `python3.exe`로 복사하여 우회함.
+  2. unicodeescape 문제: Vercel의 `@vercel/python` 모듈이 Windows 경로 문자열(\)을 이스케이프 처리하지 않아서 생기는 Vercel 내부 버그. 이를 해결하기 위해 `vercel dev` 대신 이미 구현되어 있던 `server_local.py` 통합 서버를 사용하도록 안내함.
+
+--------------------------------------------------------------------------------
+[Q4] 사용자: 배포 링크 접속 시 UI(index.html)가 안 보이고 JSON 데이터({"message": "AI 명언 API가 정상적으로 작동하고 있습니다."})만 화면에 표시됨.
+- 분석: 
+  Vercel의 Zero Config가 루트 폴더에 있는 `requirements.txt`를 보고 프로젝트 전체를 Python 백엔드 서버로 인식하여, 루트 주소(/)를 `api/index.py`로 강제 매핑함.
+- 해결 사항: 
+  `requirements.txt` 파일을 `api/` 폴더 안으로 이동하여 백엔드 종속성을 분리시킴.
+
+--------------------------------------------------------------------------------
+[Q5] 사용자: "동일하게 json 결과값으로 나옵니다.", "여전히 안나옵니다."
+- 분석: 
+  루트 폴더에 여전히 파이썬 패키지 관리 파일(`pyproject.toml`, `uv.lock`)과 로컬 서버 실행 스크립트(`server_local.py`)가 남아 있어서 Vercel이 계속 Python 프로젝트로 오해함.
+- 해결 사항 (최종 조치):
+  1. `pyproject.toml`, `uv.lock` 파일을 `api/` 폴더로 이동.
+  2. `server_local.py`가 Vercel 배포 시 무시되도록 `.vercelignore` 파일 생성 및 추가.
+  3. `vercel.json`에 명시적인 `builds` 속성을 추가하여, `index.html` 등의 프론트엔드 에셋은 정적 파일(`@vercel/static`)로 빌드하고, `api/index.py`는 Python 백엔드(`@vercel/python`)로 동작하도록 강제 맵핑함.
+- 최종 결과:
+  프론트엔드와 백엔드가 완벽하게 분리되어 Vercel에 배포 완료. 메인 도메인 접속 시 정상적으로 명언 생성기 UI가 출력됨. (해결 완료)
