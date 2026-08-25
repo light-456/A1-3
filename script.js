@@ -37,7 +37,7 @@ async function generateAdvice() {
     const timeoutId = setTimeout(() => controller.abort(), 45000);
 
     try {
-        const response = await fetch('/api/index', {
+        const response = await fetch('/api/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

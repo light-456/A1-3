@@ -5,7 +5,7 @@ AI가 사용자의 고민과 감정 상태를 분석하여 따뜻한 위로와 �
 ---
 
 ## 🔗 배포 URL
-- **Vercel 배포 주소**: `https://<YOUR-VERCEL-APP>.vercel.app` *(Vercel 배포 후 주소 입력)*
+- **Vercel 배포 주소**: `https://<YOUR-VERCEL-APP>.vercel.app`
 
 ---
 
