@@ -2,7 +2,9 @@ import os
 import json
 import urllib.request
 from http.server import BaseHTTPRequestHandler
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class handler(BaseHTTPRequestHandler):
 
@@ -27,6 +29,9 @@ class handler(BaseHTTPRequestHandler):
                     }
                 )
                 return
+
+            groq_model = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
+            groq_url = os.environ.get("GROQ_URL", "https://api.groq.com/openai/v1/chat/completions")
 
             # 2. 프론트엔드에서 보낸 데이터 읽기
             content_length = int(
@@ -53,7 +58,7 @@ class handler(BaseHTTPRequestHandler):
 
             # 4. Groq API 요청 데이터
             payload = {
-                "model": "llama-3.3-70b-versatile",
+                "model": groq_model,
                 "messages": [
                     {
                         "role": "system",
@@ -71,15 +76,13 @@ class handler(BaseHTTPRequestHandler):
             }
 
             # 5. Groq API 주소
-            url = (
-                "https://api.groq.com/"
-                "openai/v1/chat/completions"
-            )
+            url = groq_url
 
             # 6. API 요청 헤더
             req_headers = {
                 "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "User-Agent": "Mozilla/5.0"
             }
 
             # 7. Groq API 호출
@@ -118,7 +121,8 @@ class handler(BaseHTTPRequestHandler):
             self.send_json(
                 500,
                 {
-                    "error": "잠시 후 다시 시도해주세요."
+                    "error": "잠시 후 다시 시도해주세요.",
+                    "details": str(e)
                 }
             )
 
